@@ -29,13 +29,12 @@ origins = [
     "http://localhost:5500",
     "null"
 ]
-# Dodajemy CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bestemcatering.onrender.com"],  # Zezwól na zapytania tylko z tej domeny
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Zezwól na wszystkie metody HTTP (GET, POST, etc.)
-    allow_headers=["*"],  # Zezwól na wszystkie nagłówki
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # MongoDB

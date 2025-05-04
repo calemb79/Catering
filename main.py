@@ -548,7 +548,7 @@ def export_orders_erp(admin_username: str):
         total_price = round(sum(meal['price'] for meal in order.get("meals", [])), 2)
 
         # Przygotuj wiersz danych - total_price jako liczba bez dodatkowych oznaczeń i .0 dla liczb całkowitych
-        if total_price.is_integer():
+        if total_price % 1 == 0:
             total_price = int(total_price)  # Usuń .0 dla liczb całkowitych
         row = f"\n{order['username']};{total_price};{order['week']}"
         output.write(row.encode('utf-8'))

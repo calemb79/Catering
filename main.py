@@ -25,7 +25,7 @@ app = FastAPI()
 # CORS
 origins = [
     "https://cateringbestem.onrender.com"
-    ""https://catering-1.onrender.com"
+    "https://catering-1.onrender.com"
     "http://localhost",
     "http://127.0.0.1",
     "http://localhost:5500",

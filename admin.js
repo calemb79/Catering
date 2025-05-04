@@ -36,7 +36,7 @@ function login() {
   loginBtn.innerHTML = '<span class="loader"></span> Logowanie...';
   loginBtn.disabled = true;
 
-  fetch("http://localhost:8000/login", {
+  fetch("https://catering-1.onrender.com/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })

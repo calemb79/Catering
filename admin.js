@@ -87,6 +87,25 @@ function addUser() {
   const role = document.getElementById("new-role").value;
   const userCode = document.getElementById("new-user-code").value;
 
+// Walidacja pól
+  if (!username) {
+    showNotification("Proszę podać numer RCP (username)", 'error');
+    document.getElementById("new-username").focus();
+    return;
+  }
+
+  if (!password) {
+    showNotification("Proszę podać hasło", 'error');
+    document.getElementById("new-password").focus();
+    return;
+  }
+
+  if (!userCode) {
+    showNotification("Proszę podać imię i nazwisko użytkownika", 'error');
+    document.getElementById("new-user-code").focus();
+    return;
+  }
+
   fetch("https://catering-1.onrender.com/admin/add_user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -252,6 +271,7 @@ function addDish() {
   const name = document.getElementById("dish-name").value;
   const description = document.getElementById("dish-description").value;
   const price = parseFloat(document.getElementById("dish-price").value);
+  const day = document.getElementById("dish-day").value;
 
   if (!name || !description || isNaN(price)) {
     showNotification("Uzupełnij wszystkie pola", 'error');
@@ -261,7 +281,13 @@ function addDish() {
   fetch("https://catering-1.onrender.com/menu", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, description, price, username: loggedInUser })
+    body: JSON.stringify({ 
+      name, 
+      description, 
+      price, 
+      day,  // Dodane pole dnia
+      username: loggedInUser 
+    })
   })
     .then(res => res.json())
     .then(data => {
@@ -288,12 +314,13 @@ function loadMenu() {
       table.classList.add('animate__animated', 'animate__fadeIn');
       
       const header = document.createElement("tr");
-      header.innerHTML = "<th>Nazwa</th><th>Opis</th><th>Cena</th><th>Akcje</th>";
+      header.innerHTML = "<th>Dzień</th><th>Nazwa</th><th>Opis</th><th>Cena</th><th>Akcje</th>";
       table.appendChild(header);
 
       menu.forEach(item => {
         const row = document.createElement("tr");
         row.innerHTML = `
+          <td>${item.day || 'Brak dnia'}</td>
           <td>${item.name}</td>
           <td>${item.description}</td>
           <td>${item.price.toFixed(2)} zł</td>
@@ -382,6 +409,7 @@ function fetchOrders() {
             <th>Kod użytkownika</th>
             <th>Użytkownik</th>
             <th>Tydzień</th>
+	    <th>Miejsce</th>
             <th>Dania</th>
             <th>Akcje</th>
           `;
@@ -413,13 +441,14 @@ function fetchOrders() {
               <td>${userCodeMap[order.username] || 'Brak kodu'}</td>
               <td>${order.username}</td>
               <td>${order.week}</td>
+	      <td>${order.date_range || 'Brak danych'}</td>
               <td>${meals}</td>
               <td></td>
             `;
             
             // Wstaw checkbox i przycisk
             row.cells[0].appendChild(checkbox);
-            const actionCell = row.cells[5];
+            const actionCell = row.cells[6];
             actionCell.appendChild(deleteBtn);
             
             table.appendChild(row);
@@ -626,7 +655,6 @@ async function deleteSelectedOrders() {
 async function downloadPDF() {
   const button = document.querySelector('.danger-btn');
   try {
-    // Pokaż stan ładowania
     button.innerHTML = '<span class="loader"></span> Przygotowywanie PDF...';
     button.disabled = true;
 
@@ -636,16 +664,12 @@ async function downloadPDF() {
       throw new Error("Błąd podczas generowania raportu PDF");
     }
 
-    // Pobierz nazwę pliku z nagłówków
     const contentDisposition = response.headers.get('Content-Disposition');
     const filename = contentDisposition 
       ? contentDisposition.split('filename=')[1] 
       : `raport_zamowien_${new Date().toISOString().slice(0,10)}.pdf`;
 
-    // Konwertuj odpowiedź na blob
     const blob = await response.blob();
-    
-    // Utwórz link do pobrania
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -653,7 +677,6 @@ async function downloadPDF() {
     document.body.appendChild(a);
     a.click();
     
-    // Posprzątaj
     window.URL.revokeObjectURL(url);
     a.remove();
     
@@ -662,7 +685,6 @@ async function downloadPDF() {
     console.error("Błąd pobierania raportu PDF:", error);
     showNotification(error.message, "error");
   } finally {
-    // Przywróć pierwotny stan przycisku
     button.innerHTML = 'Pobierz raport PDF';
     button.disabled = false;
   }
@@ -708,6 +730,110 @@ async function downloadERP() {
   } finally {
     // Przywróć pierwotny stan przycisku
     button.innerHTML = 'Pobierz raport ERP';
+    button.disabled = false;
+  }
+}
+
+async function downloadDishesReport() {
+  const button = document.querySelector('.accent-btn');
+  try {
+    // Pokaż stan ładowania
+    button.innerHTML = '<span class="loader"></span> Przygotowywanie raportu...';
+    button.disabled = true;
+
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/dishes_report?admin_username=${encodeURIComponent(loggedInUser)}`);
+    
+    if (!response.ok) {
+      throw new Error("Błąd podczas generowania raportu");
+    }
+
+    // Pobierz nazwę pliku z nagłówków
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename = contentDisposition 
+      ? contentDisposition.split('filename=')[1] 
+      : `raport_dan_${new Date().toISOString().slice(0,10)}.xlsx`;
+
+    // Konwertuj odpowiedź na blob
+    const blob = await response.blob();
+    
+    // Utwórz link do pobrania
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Posprzątaj
+    window.URL.revokeObjectURL(url);
+    a.remove();
+    
+    showNotification("Raport dań został pobrany", "success");
+  } catch (error) {
+    console.error("Błąd pobierania raportu:", error);
+    showNotification(error.message, "error");
+  } finally {
+    // Przywróć pierwotny stan przycisku
+    button.innerHTML = 'Pobierz raport dań';
+    button.disabled = false;
+  }
+}
+
+function logout() {
+  // Animacja wyjścia
+  document.getElementById("admin-panel").classList.add('animate__animated', 'animate__fadeOut');
+  
+  setTimeout(() => {
+    // Ukryj panel admina i pokaż sekcję logowania
+    document.getElementById("admin-panel").style.display = "none";
+    document.getElementById("login-section").style.display = "block";
+    document.getElementById("login-section").classList.add('animate__animated', 'animate__fadeIn');
+    
+    // Wyczyść pola logowania
+    document.getElementById("admin-login").value = "";
+    document.getElementById("admin-password").value = "";
+    
+    // Zresetuj zalogowanego użytkownika
+    loggedInUser = null;
+    
+    showNotification("Wylogowano pomyślnie", 'success');
+  }, 500);
+}
+
+async function downloadWordMailMerge() {
+  const button = document.querySelector('.accent-btn');
+  try {
+    button.innerHTML = '<span class="loader"></span> Przygotowywanie...';
+    button.disabled = true;
+
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/word_mailmerge?admin_username=${encodeURIComponent(loggedInUser)}`);
+    
+    if (!response.ok) {
+      throw new Error("Błąd podczas generowania raportu");
+    }
+
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename = contentDisposition 
+      ? contentDisposition.split('filename=')[1] 
+      : `raport_korespondencja_${new Date().toISOString().slice(0,10)}.docx`;
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    window.URL.revokeObjectURL(url);
+    a.remove();
+    
+    showNotification("Plik do korespondencji seryjnej został pobrany", "success");
+  } catch (error) {
+    console.error("Błąd pobierania:", error);
+    showNotification(error.message, "error");
+  } finally {
+    button.innerHTML = 'Pobierz do Word (korespondencja)';
     button.disabled = false;
   }
 }

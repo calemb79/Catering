@@ -1,7 +1,8 @@
 let loggedInUser = "";
 let userOrders = [];
+let isHistoryVisible = false;
 
-async function login() {
+window.login = async function() {
   const login = document.getElementById("login").value;
   const password = document.getElementById("password").value;
 
@@ -30,6 +31,9 @@ async function login() {
         
         document.getElementById("user-panel").style.display = "block";
         document.getElementById("user-panel").classList.add('animate__animated', 'animate__fadeInUp');
+if (document.getElementById('order-week').value) {
+  updateWeekCalendar(document.getElementById('order-week').value);
+}
         
         document.querySelector(".logout-btn").style.display = "flex";
         document.querySelector(".logout-btn").classList.add('animate__animated', 'animate__fadeIn');
@@ -79,10 +83,10 @@ function updateOrderSummary() {
     summaryElement.classList.remove('animate__animated', 'animate__pulse');
   }, 1000);
   
-  summaryElement.textContent = `Suma zamówień: ${total.toFixed(2)} zł`;
+  summaryElement.textContent = `Suma tygodniowych zamówień: ${total.toFixed(2)} zł`;
   
-  if (total > 50) {
-    const difference = total - 50;
+  if (total > 55) {
+    const difference = total - 55;
     deductionInfo.textContent = `Przekroczenie dofinansowania o: ${difference.toFixed(2)} zł`;
     deductionInfo.style.display = "block";
     deductionInfo.classList.add('animate__animated', 'animate__pulse');
@@ -90,6 +94,35 @@ function updateOrderSummary() {
     deductionInfo.style.display = "none";
     deductionInfo.classList.remove('animate__animated', 'animate__pulse');
   }
+}
+
+function updateOrderPreview() {
+  const selects = document.querySelectorAll("#menu-container select");
+  let total = 0;
+  let hasSelection = false;
+  
+  selects.forEach(select => {
+    if (select.value) {
+      const { price } = JSON.parse(select.value);
+      total += parseFloat(price);
+      hasSelection = true;
+    }
+  });
+  
+  const preview = document.getElementById("order-preview");
+  preview.textContent = `Suma zamówienia: ${total.toFixed(2)} zł`;
+  
+  if (hasSelection) {
+    preview.classList.add('visible');
+  } else {
+    preview.classList.remove('visible');
+  }
+  
+  // Animacja
+  preview.classList.add('animate__animated', 'animate__pulse');
+  setTimeout(() => {
+    preview.classList.remove('animate__animated', 'animate__pulse');
+  }, 500);
 }
 
 async function loadMenu() {
@@ -112,13 +145,17 @@ async function loadMenu() {
       const select = document.createElement("select");
       select.name = day;
       select.classList.add('ripple');
+      select.addEventListener('change', updateOrderPreview);
 
       const defaultOption = document.createElement("option");
       defaultOption.text = "Wybierz danie";
       defaultOption.value = "";
       select.appendChild(defaultOption);
 
-      menuItems.forEach(item => {
+      // Filtruj dania tylko dla danego dnia
+      const dayMenuItems = menuItems.filter(item => item.day === day);
+      
+      dayMenuItems.forEach(item => {
         const option = document.createElement("option");
         option.value = JSON.stringify({ name: item.name, price: item.price });
         option.text = `${item.name} (${item.price.toFixed(2)} zł)`;
@@ -129,6 +166,8 @@ async function loadMenu() {
       groupDiv.appendChild(select);
       container.appendChild(groupDiv);
     });
+    
+    updateOrderPreview();
   } catch (error) {
     console.error("Błąd ładowania menu:", error);
   }
@@ -155,7 +194,8 @@ async function submitOrder() {
   selects.forEach(select => {
     if (select.value) {
       const { name, price } = JSON.parse(select.value);
-      meals[select.name] = [{ name, price }];
+      // Dodajemy informację o dniu do zamówienia
+      meals[select.name] = [{ name, price, day: select.name }];
       hasMeals = true;
     }
   });
@@ -188,7 +228,9 @@ async function submitOrder() {
       showSuccess("Zamówienie złożone pomyślnie!");
       loadOrderHistory();
       
+      // Reset formularza
       document.getElementById('order-week').value = '';
+      document.getElementById('week-calendar').style.display = 'none'; // Dodaj tę linijkę
       document.getElementById('delivery-location').value = '';
       selects.forEach(select => {
         select.value = '';
@@ -197,6 +239,8 @@ async function submitOrder() {
           select.classList.remove('animate__animated', 'animate__flash');
         }, 1000);
       });
+      
+      updateOrderPreview();
     } else {
       const errorData = await response.json();
       throw new Error(errorData.detail || "Nie udało się złożyć zamówienia");
@@ -208,8 +252,6 @@ async function submitOrder() {
     submitBtn.disabled = false;
   }
 }
-
-let isHistoryVisible = false;
 
 async function toggleHistory() {
   const button = document.getElementById("toggle-history");
@@ -228,23 +270,23 @@ async function toggleHistory() {
       container.classList.add('animate__animated', 'animate__fadeIn');
       
       userOrders.forEach((order, index) => {
-        const div = document.createElement("div");
-        div.classList.add('order-item', 'animate__animated', 'animate__fadeIn');
-        div.style.animationDelay = `${index * 0.1}s`;
-        div.innerHTML = `
-          <div class="order-header">
-            <strong>Tydzień:</strong> ${order.week} (${order.date_range})
-          </div>
-          <div class="order-meals">
-            <strong>Pozycje:</strong>
-            <ul>
-              ${order.meals.map(meal => `<li>${meal.day}: ${meal.name} (${meal.price} zł)</li>`).join("")}
-            </ul>
-          </div>
-          <hr>
-        `;
-        container.appendChild(div);
-      });
+    const div = document.createElement("div");
+    div.classList.add('order-item', 'animate__animated', 'animate__fadeIn');
+    div.style.animationDelay = `${index * 0.1}s`;
+    div.innerHTML = `
+      <div class="order-header">
+        <strong>Tydzień:</strong> ${order.week} (${order.date_range})
+      </div>
+      <div class="order-meals">
+        <strong>Pozycje:</strong>
+        <ul>
+          ${order.meals.map(meal => `<li>${meal.day}: ${meal.name} (${meal.price} zł)</li>`).join("")}
+        </ul>
+      </div>
+      <hr>
+    `;
+    container.appendChild(div);
+  });
 
       button.textContent = "Zakryj historię";
       isHistoryVisible = true;
@@ -387,3 +429,59 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+function updateWeekCalendar(weekString) {
+  const calendar = document.getElementById('week-calendar');
+  calendar.innerHTML = '';
+  
+  if (!weekString || !weekString.includes('-W')) {
+    calendar.style.display = 'none';
+    return;
+  }
+  
+  try {
+    calendar.style.display = 'grid';
+    
+    const [year, weekNum] = weekString.split('-W').map(Number);
+    
+    if (isNaN(year)) throw new Error("Invalid year"); // Dodano brakujący nawias
+    if (isNaN(weekNum)) throw new Error("Invalid week");
+    
+    // Tworzymy datę dla pierwszego dnia roku
+    const date = new Date(year, 0, 1);
+    
+    // Znajdź pierwszy czwartek roku (ISO week date)
+    while (date.getDay() !== 4) {
+      date.setDate(date.getDate() + 1);
+    }
+    
+    // Przesuń się do wybranego tygodnia
+    date.setDate(date.getDate() + (weekNum - 1) * 7);
+    
+    // Cofnij się do poniedziałku
+    date.setDate(date.getDate() - 3);
+    
+    // Nagłówki dni i daty
+    const days = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'];
+    
+    // Wyświetl dni tygodnia z datami
+    for (let i = 0; i < 7; i++) {
+      // Nagłówek dnia
+      const dayHeader = document.createElement('div');
+      dayHeader.className = 'calendar-day-header';
+      dayHeader.textContent = days[i];
+      calendar.appendChild(dayHeader);
+      
+      // Dzień z datą
+      const dayElement = document.createElement('div');
+      dayElement.className = 'calendar-day selected';
+      dayElement.textContent = date.getDate();
+      calendar.appendChild(dayElement);
+      
+      date.setDate(date.getDate() + 1);
+    }
+  } catch (error) {
+    console.error("Błąd generowania kalendarza:", error);
+    calendar.style.display = 'none';
+  }
+}

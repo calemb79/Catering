@@ -352,7 +352,7 @@ def export_orders_excel(admin_username: str):
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Zamówienia')
-        worksheet = writer.sheets['Zamółwienia']
+        worksheet = writer.sheets['Zamówienia']
 
         # Formatowanie kolumn z cenami jako waluta
         for col_idx, column in enumerate(df.columns, 1):

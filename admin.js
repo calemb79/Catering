@@ -38,7 +38,7 @@ function login() {
   loginBtn.innerHTML = '<span class="loader"></span> Logowanie...';
   loginBtn.disabled = true;
 
-  fetch("https://bestemcatering.onrender.com/login", {
+  fetch("https://catering-1.onrender.com/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -109,7 +109,7 @@ function addUser() {
     return;
   }
 
-  fetch("https://bestemcatering.onrender.com/admin/add_user", {
+  fetch("https://catering-1.onrender.com/admin/add_user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -156,7 +156,7 @@ function fetchUsers() {
   refreshButton.innerHTML = '<span class="loader"></span> Ładowanie...';
   refreshButton.disabled = true;
 
-  fetch(`https://bestemcatering.onrender.com/admin/users?admin_username=${loggedInUser}`)
+  fetch(`https://catering-1.onrender.com/admin/users?admin_username=${loggedInUser}`)
     .then(res => res.json())
     .then(users => {
       container.innerHTML = "";
@@ -253,7 +253,7 @@ function changeRolePrompt(username) {
   const newRole = prompt("Nowa rola (user/admin):", "user");
   if (!newRole) return;
 
-  fetch(`https://bestemcatering.onrender.com/admin/update_role?username=${username}&new_role=${newRole}&admin_username=${loggedInUser}`, {
+  fetch(`https://catering-1.onrender.com/admin/update_role?username=${username}&new_role=${newRole}&admin_username=${loggedInUser}`, {
     method: "PUT"
   })
     .then(res => res.json())
@@ -270,7 +270,7 @@ function changePasswordPrompt(username) {
   const newPassword = prompt(`Nowe hasło dla ${username}:`);
   if (!newPassword) return;
 
-  fetch(`https://bestemcatering.onrender.com/admin/change_password?username=${username}&new_password=${newPassword}&admin_username=${loggedInUser}`, {
+  fetch(`https://catering-1.onrender.com/admin/change_password?username=${username}&new_password=${newPassword}&admin_username=${loggedInUser}`, {
     method: "PUT"
   })
     .then(res => res.json())
@@ -281,7 +281,7 @@ function changePasswordPrompt(username) {
 function deleteUser(username) {
   if (!confirm(`Czy na pewno chcesz usunąć użytkownika ${username}?`)) return;
 
-  fetch(`https://bestemcatering.onrender.com/admin/delete_user?username=${username}&admin_username=${loggedInUser}`, {
+  fetch(`https://catering-1.onrender.com/admin/delete_user?username=${username}&admin_username=${loggedInUser}`, {
     method: "DELETE"
   })
     .then(res => {
@@ -314,7 +314,7 @@ function addDish() {
     return;
   }
 
-  fetch("https://bestemcatering.onrender.com/menu", {
+  fetch("https://catering-1.onrender.com/menu", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ 
@@ -346,7 +346,7 @@ function loadMenu() {
     button.innerHTML = '<span class="loader"></span> Ładowanie...';
     button.disabled = true;
     
-    fetch("https://bestemcatering.onrender.com/menu/list")
+    fetch("https://catering-1.onrender.com/menu/list")
       .then(res => res.json())
       .then(menu => {
         const container = document.getElementById("menu-list");
@@ -426,7 +426,7 @@ async function saveEditedDish() {
   }
 
   try {
-    const response = await fetch("https://bestemcatering.onrender.com/menu/update", {
+    const response = await fetch("https://catering-1.onrender.com/menu/update", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -472,7 +472,7 @@ function fetchOrders() {
     return;
   }
 
-  fetch(`https://bestemcatering.onrender.com/admin/orders?admin_username=${encodeURIComponent(loggedInUser)}`)
+  fetch(`https://catering-1.onrender.com/admin/orders?admin_username=${encodeURIComponent(loggedInUser)}`)
     .then(async response => {
       if (!response.ok) {
         const error = await response.json();
@@ -491,7 +491,7 @@ function fetchOrders() {
         return;
       }
 
-      fetch(`https://bestemcatering.onrender.com/admin/users?admin_username=${loggedInUser}`)
+      fetch(`https://catering-1.onrender.com/admin/users?admin_username=${loggedInUser}`)
         .then(res => res.json())
         .then(users => {
           const userCodeMap = {};
@@ -621,7 +621,7 @@ async function deleteOrder(orderId) {
   if (!confirm(`Czy na pewno chcesz usunąć to zamówienie?`)) return;
 
   try {
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/delete_order`, {
+    const response = await fetch(`https://catering-1.onrender.com/admin/delete_order`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -679,7 +679,7 @@ async function downloadExcel() {
     button.innerHTML = '<span class="loader"></span> Przygotowywanie raportu...';
     button.disabled = true;
 
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/orders/excel?admin_username=${encodeURIComponent(loggedInUser)}`);
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/excel?admin_username=${encodeURIComponent(loggedInUser)}`);
     
     if (!response.ok) {
       throw new Error("Błąd podczas generowania raportu");
@@ -755,7 +755,7 @@ function toggleMenu() {
   button.innerHTML = '<span class="loader"></span> Ładowanie...';
   button.disabled = true;
 
-  fetch("https://bestemcatering.onrender.com/menu/list")
+  fetch("https://catering-1.onrender.com/menu/list")
     .then(res => res.json())
     .then(menu => {
       container.innerHTML = "";
@@ -850,7 +850,7 @@ async function deleteSelectedDishes() {
   deleteSelectedBtn.disabled = true;
 
   try {
-    const response = await fetch(`https://bestemcatering.onrender.com/menu/delete_selected`, {
+    const response = await fetch(`https://catering-1.onrender.com/menu/delete_selected`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -882,7 +882,7 @@ async function deleteSelectedDishes() {
 function deleteDish(dishName) {
   if (!confirm(`Czy na pewno chcesz usunąć danie: "${dishName}"?`)) return;
 
-  fetch(`https://bestemcatering.onrender.com/menu/delete`, {
+  fetch(`https://catering-1.onrender.com/menu/delete`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -940,7 +940,7 @@ async function deleteSelectedOrders() {
   deleteSelectedBtn.disabled = true;
 
   try {
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/delete_orders`, {
+    const response = await fetch(`https://catering-1.onrender.com/admin/delete_orders`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -975,7 +975,7 @@ async function downloadPDF() {
     button.innerHTML = '<span class="loader"></span> Przygotowywanie PDF...';
     button.disabled = true;
 
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/orders/pdf?admin_username=${encodeURIComponent(loggedInUser)}`);
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/pdf?admin_username=${encodeURIComponent(loggedInUser)}`);
     
     if (!response.ok) {
       throw new Error("Błąd podczas generowania raportu PDF");
@@ -1013,7 +1013,7 @@ async function downloadERP() {
     button.innerHTML = '<span class="loader"></span> Przygotowywanie ERP...';
     button.disabled = true;
 
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/orders/erp?admin_username=${encodeURIComponent(loggedInUser)}`);
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/erp?admin_username=${encodeURIComponent(loggedInUser)}`);
     
     if (!response.ok) {
       throw new Error("Błąd podczas generowania raportu ERP");
@@ -1058,7 +1058,7 @@ async function downloadDishesReport() {
     button.innerHTML = '<span class="loader"></span> Przygotowywanie raportu...';
     button.disabled = true;
 
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/orders/dishes_report?admin_username=${encodeURIComponent(loggedInUser)}`);
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/dishes_report?admin_username=${encodeURIComponent(loggedInUser)}`);
     
     if (!response.ok) {
       throw new Error("Błąd podczas generowania raportu");
@@ -1123,7 +1123,7 @@ async function downloadWordMailMerge() {
     button.innerHTML = '<span class="loader"></span> Przygotowywanie...';
     button.disabled = true;
 
-    const response = await fetch(`https://bestemcatering.onrender.com/admin/orders/word_mailmerge?admin_username=${encodeURIComponent(loggedInUser)}`);
+    const response = await fetch(`https://catering-1.onrender.com/admin/orders/word_mailmerge?admin_username=${encodeURIComponent(loggedInUser)}`);
     
     if (!response.ok) {
       throw new Error("Błąd podczas generowania raportu");
@@ -1162,7 +1162,7 @@ async function updateLoginMessage() {
     return;
   }
   try {
-    const response = await fetch('https://bestemcatering.onrender.com/messages', {
+    const response = await fetch('https://catering-1.onrender.com/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: messageText }),
@@ -1182,7 +1182,7 @@ async function updateLoginMessage() {
   const messageText = document.getElementById('messageText').value;
 
   try {
-    const response = await fetch('https://bestemcatering.onrender.com/messages', {
+    const response = await fetch('https://catering-1.onrender.com/messages', {
       method: 'PUT', // lub 'POST', jeśli Twój backend tak obsługuje
       headers: {
         'Content-Type': 'application/json',
@@ -1212,7 +1212,7 @@ async function updateLoginMessage() {
 
 async function fetchCurrentMessage() {
   try {
-    const response = await fetch('https://bestemcatering.onrender.com/messages');
+    const response = await fetch('https://catering-1.onrender.com/messages');
     if (!response.ok) {
       throw new Error(`Błąd sieci: ${response.status} ${response.statusText}`);
     }

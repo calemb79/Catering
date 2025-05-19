@@ -11,7 +11,7 @@ window.login = async function() {
   loginBtn.disabled = true;
 
   try {
-    const res = await fetch("https://bestemcatering.onrender.com/login", {
+    const res = await fetch("https://catering-1.onrender.com/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: login, password: password })
@@ -60,7 +60,7 @@ if (document.getElementById('order-week').value) {
 
 async function loadOrderHistory() {
   try {
-    const res = await fetch(`https://bestemcatering.onrender.com/order/history?username=${loggedInUser}`);
+    const res = await fetch(`https://catering-1.onrender.com/order/history?username=${loggedInUser}`);
     userOrders = await res.json();
     updateOrderSummary();
   } catch (error) {
@@ -128,7 +128,7 @@ function updateOrderPreview() {
 
 async function loadMenu() {
   try {
-    const res = await fetch("https://bestemcatering.onrender.com/menu/list");
+    const res = await fetch("https://catering-1.onrender.com/menu/list");
     const menuItems = await res.json();
 
     const days = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
@@ -229,7 +229,7 @@ async function submitOrder() {
   submitBtn.disabled = true;
 
   try {
-    const response = await fetch("https://bestemcatering.onrender.com/order/weekly", {
+    const response = await fetch("https://catering-1.onrender.com/order/weekly", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -274,7 +274,7 @@ async function toggleHistory() {
 
   try {
     if (!isHistoryVisible) {
-      const res = await fetch(`https://bestemcatering.onrender.com/order/history?username=${loggedInUser}`);
+      const res = await fetch(`https://catering-1.onrender.com/order/history?username=${loggedInUser}`);
       userOrders = await res.json();
       updateOrderSummary();
 
@@ -346,7 +346,7 @@ function logout() {
     document.getElementById("deduction-info").style.display = "none";
 
     // fetch do wylogowania
-    fetch("https://bestemcatering.onrender.com/logout", { 
+    fetch("https://catering-1.onrender.com/logout", { 
       method: "POST",
       credentials: 'include'
     })
@@ -558,7 +558,7 @@ async function fetchLoginMessage() {
   const messageElement = document.getElementById("loginMessage");
   
   try {
-    const response = await fetch("https://bestemcatering.onrender.com/messages");
+    const response = await fetch("https://catering-1.onrender.com/messages");
     
     if (!response.ok) {
       throw new Error(`Błąd HTTP: ${response.status}`);
